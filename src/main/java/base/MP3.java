@@ -29,7 +29,7 @@ public class MP3 {
     private static void test() {
         SeekableByteChannel seekableByteChannel = null;
         try {
-            seekableByteChannel = Files.newByteChannel(Paths.get("res/hello.mp3"), StandardOpenOption.READ);
+            seekableByteChannel = Files.newByteChannel(Paths.get("res/test_2019.mp3"), StandardOpenOption.READ);
             System.out.println("hasID3V1 : " + hasID3V1());
 
             ByteBuffer byteBuffer = ByteBuffer.allocate(HEAD_LENGTH);
@@ -69,7 +69,11 @@ public class MP3 {
             seekableByteChannel.read(byteBuffer);
             System.out.println("\t" + parseFrameLength(byteBuffer.array()));
 
-
+            byte[] bytes="你好".getBytes("UTF-16LE");
+            for (int i = 0; i < bytes.length; i++) {
+                System.out.printf("%x",bytes[i]);
+            }
+            System.out.println();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

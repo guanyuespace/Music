@@ -10,8 +10,8 @@ import java.io.IOException;
 public class Convert {
     public static void convert() {
         try {
-            FileOutputStream outputStream = new FileOutputStream("D:/IdeaProjects/Music/res/65538.mp3");
-            FileInputStream inputStream = new FileInputStream("D:/IdeaProjects/Music/res/65538.mp3.uc!");
+            FileOutputStream outputStream = new FileOutputStream("res/test_2019.mp3");
+            FileInputStream inputStream = new FileInputStream("res/test_2019.uc");
             byte[] bytes = new byte[1024];
             int size = 0;
             while ((size = inputStream.read(bytes)) != -1) {

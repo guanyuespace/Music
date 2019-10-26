@@ -3,6 +3,7 @@ package base;
 import util.Convert;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
@@ -31,6 +32,8 @@ public class LabelFrame {
     private String flags;
     private byte[] data;
 
+    private Song song=new Song();
+
     private static int calcSize(byte[] bytes, int offset, int length) {
         int ret = (bytes[offset + length - 1] & 0xff) + ((bytes[offset + length - 2] & 0xff) << 8) + ((bytes[offset + length - 3] & 0xff) << 16) + ((bytes[offset] & 0xff) << 24);
         return ret;
@@ -44,9 +47,8 @@ public class LabelFrame {
         LabelFrame result = new LabelFrame();
         result.frameId = new String(bytes, 0, 4, Charset.forName("ASCII"));
         result.size = calcSize(bytes, 4, 4);
-        result.flags = Convert.convertByte2HexStr(bytes, 8, 2);
+        result.flags = Convert.convertByte2HexStr(bytes, 8, 2);// FLAG ===> song
         byteBuffer.clear();
-
 
         byteBuffer = ByteBuffer.allocate((int) result.size);
         seekableByteChannel.read(byteBuffer);
@@ -62,14 +64,24 @@ public class LabelFrame {
 //        if (frameId.trim().equals("")) return "";
 //        if (data.length == 0) return "";
 //        String desp = frameId.equals("COMM") ? new String(data, Charset.forName("ASCII")) : Convert.convertByte2HexStr(data);
-        return "LabelFrame{" +
-                "frameId='" + frameId + '\'' +
-                "total_Size=" + total_Size +
-                ", size=" + size +
-                ", flags='" + flags + '\'' +
-                ", data=" + Convert.convertByte2HexStr(data) +
-                '}';
+        try {
+            return "LabelFrame{" +
+                    "frameId='" + frameId + '\'' +
+                    "total_Size=" + total_Size +
+                    ", size=" + size + data.length +
+                    ", flags='" + flags + '\'' +
+                    ", data=" + Convert.convertByte2HexStr(data) +
+                    ", ascii=" + new String(data, data.length > 3 ? 3 : 0, data.length > 3 ? data.length - 3 : data.length, data.length > 3 ? "UTF-16LE" : "ASCII") +//高晓松 - [青春无悔].专辑
+                    '}';
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return "exception";
     }
+    //数据data
+//    TIT2 TALB TPE1前3字节 01FFFE
+//    数据采用UTF-16LE编码
+//    TSSE编码使用的软件（硬件设置）纯英文采用：ascii
 
 
     public boolean isZero() {
