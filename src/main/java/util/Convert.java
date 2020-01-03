@@ -1,17 +1,18 @@
 package util;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-/**
- *
- */
 public class Convert {
-    public static void convert() {
-        try {
-            FileOutputStream outputStream = new FileOutputStream("res/test_2019.mp3");
-            FileInputStream inputStream = new FileInputStream("res/test_2019.uc");
+    private static void convertMusic(String src, String dest) {
+        try (FileInputStream inputStream = new FileInputStream(src);
+             FileOutputStream outputStream = new FileOutputStream(dest)) {
             byte[] bytes = new byte[1024];
             int size = 0;
             while ((size = inputStream.read(bytes)) != -1) {
@@ -19,11 +20,6 @@ public class Convert {
                 outputStream.write(bytes, 0, size);
                 outputStream.flush();
             }
-
-            if (outputStream != null)
-                outputStream.close();
-            if (inputStream != null)
-                inputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -35,12 +31,12 @@ public class Convert {
         }
     }
 
-
+    @Deprecated
     public static String convertByte2HexStr(byte[] bytes) {
         return convertByte2HexStr(bytes, 0, bytes.length);
     }
 
-
+    @Deprecated
     public static String convertByte2HexStr(byte[] bytes, int offset, int length) {
         StringBuilder stringBuilder = new StringBuilder(2 * length);
         String str = "";
@@ -56,6 +52,40 @@ public class Convert {
     }
 
     public static void main(String[] args) {
-        convert();
+        String[] sfiles = null;
+        File sdir = new File("E:/CloudMusic/Cache/Cache");
+        if (sdir.exists() && sdir.isDirectory()) {
+            sfiles = sdir.list((File dir, String name) -> {
+                if (name.endsWith("uc"))
+                    return true;
+                return false;
+            });
+        }
+
+        if (sfiles != null) {
+            ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+            for (int i = 0; i < sfiles.length; i++) {
+                executorService.execute(new MRun("E:/CloudMusic/Cache/Cache/" + sfiles[i], "E:\\ConvertedMusic\\" + sfiles[i]+".mp3"));
+            }
+
+            executorService.shutdown();
+        }
     }
+
+    static class MRun implements Runnable {
+        String sname, dname;
+
+
+        public MRun(@NotNull String sname, @NotNull String dname) {
+            this.sname = sname;
+            this.dname = dname;
+        }
+
+        @Override
+        public void run() {
+            convertMusic(sname, dname);
+        }
+    }
+
 }
